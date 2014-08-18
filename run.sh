@@ -25,8 +25,6 @@ else
 fi
 
 sourceDir=$(pwd)
-targetDir="/tmp/git-push/"
-mkdir -p $targetDir
 
 # if directory provided, cd to it
 if [ -d "$WERCKER_GIT_PUSH_BASEDIR" ]
@@ -59,16 +57,19 @@ cd $sourceDir
 rm -rf .git
 
 # remove existing files
-cd $targetDir
-rm -rf *
+targetDir="/tmp/git-push"
+rm -rf $targetDir
 
 # init repository
 if [ -n "$WERCKER_GIT_PUSH_DISCARD_HISTORY" ]
 then
+  mkdir -p $targetDir
+  cd $targetDir
   git init
   thisbranch="master"
 else
-  git clone $remote .
+  git clone $remote $targetDir
+  cd $targetDir
   git checkout $branch
   thisbranch=$branch
 fi
