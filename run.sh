@@ -56,7 +56,7 @@ then
 fi
 
 cd $sourceDir
-rm -r .git
+rm -rf .git
 
 # remove existing files
 cd $targetDir
