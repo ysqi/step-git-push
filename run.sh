@@ -1,6 +1,6 @@
 #!/bin/sh
 
-info "using settings $WERCKER_GIT_BRANCH $WERCKER_GIT_PUSH_BASEDIR $WERCKER_GIT_PUSH_BRANCH $WERCKER_GIT_PUSH_DISCARD_HISTORY $WERCKER_GIT_PUSH_GH_PAGES $WERCKER_GIT_PUSH_GH_PAGES_DOMAIN $WERCKER_GIT_PUSH_GH_TOKEN $WERCKER_GIT_PUSH_HOST $WERCKER_GIT_PUSH_REPO $WERCKER_GIT_REPOSITORY $WERCKER_STARTED_BY"
+info "using settings $WERCKER_GIT_BRANCH $WERCKER_GIT_PUSH_BASEDIR $WERCKER_GIT_PUSH_BRANCH $WERCKER_GIT_PUSH_DISCARD_HISTORY $WERCKER_GIT_PUSH_GH_PAGES $WERCKER_GIT_PUSH_GH_PAGES_DOMAIN $WERCKER_GIT_PUSH_HOST $WERCKER_GIT_PUSH_REPO $WERCKER_GIT_REPOSITORY $WERCKER_STARTED_BY"
 
 # use repo option or guess from git info
 if [ -n "$WERCKER_GIT_PUSH_REPO" ]
@@ -70,9 +70,13 @@ then
   git init
   thisbranch="master"
 else
+  info "1"
   git clone $remote $targetDir
+  info "2"
   cd $targetDir
-  git ls-remote --exit-code . origin/$branch &> /dev/null
+  info "3"
+  git ls-remote --exit-code . origin/$branch
+  info "4"
   if [[ $? -eq 0 ]]
   then
     info "Branch $branch exists on remote"
@@ -80,6 +84,7 @@ else
   else
     git checkout -b $branch
   fi
+  info "5"
   thisbranch=$branch
 fi
 
@@ -90,6 +95,7 @@ cp -rf $sourceDir .
 
 git add .
 git diff --cached --exit-code --quiet
+info "6"
 
 if [[ $? -ne 0 ]]
 then
