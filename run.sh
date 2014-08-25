@@ -1,5 +1,7 @@
 #!/bin/sh
 
+info "using settings $WERCKER_GIT_BRANCH $WERCKER_GIT_PUSH_BASEDIR $WERCKER_GIT_PUSH_BRANCH $WERCKER_GIT_PUSH_DISCARD_HISTORY $WERCKER_GIT_PUSH_GH_PAGES $WERCKER_GIT_PUSH_GH_PAGES_DOMAIN $WERCKER_GIT_PUSH_GH_TOKEN $WERCKER_GIT_PUSH_HOST $WERCKER_GIT_PUSH_REPO $WERCKER_GIT_REPOSITORY $WERCKER_STARTED_BY"
+
 # use repo option or guess from git info
 if [ -n "$WERCKER_GIT_PUSH_REPO" ]
 then
@@ -70,7 +72,14 @@ then
 else
   git clone $remote $targetDir
   cd $targetDir
-  git checkout $branch
+  git ls-remote --exit-code . origin/$branch
+  if [[ $? -eq 0 ]]
+  then
+    info "Branch $branch exists on remote"
+    git checkout $branch
+  else
+    git checkout -b $branch
+  fi
   thisbranch=$branch
 fi
 
@@ -80,7 +89,7 @@ git config user.name "werckerbot"
 cp -rf $sourceDir .
 
 git add .
-git diff --cached --exit-code --quiet
+git diff --cached --exit-code
 
 if [[ $? -ne 0 ]]
 then
