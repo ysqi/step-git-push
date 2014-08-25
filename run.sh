@@ -59,14 +59,12 @@ fi
 
 if [ -n "$WERCKER_GIT_PUSH_TAG" ]
 then
-  wget https://stedolan.github.io/jq/download/linux64/jq
-  chmod +x jq
   case $WERCKER_GIT_PUSH_TAG in
-    "bower") tag="$(cat bower.json | ./jq .version)";;
-    "node") tag="$(cat package.json | ./jq .version)";;
+    "bower") tag="$(cat bower.json | python -c 'import sys, json; print json.load(sys.stdin)["version"]')";;
+    "node") tag="$(cat package.json | python -c 'import sys, json; print json.load(sys.stdin)["version"]')";;
     *) tag=$WERCKER_GIT_PUSH_TAG;;
   esac
-  rm jq
+  info "The commit will be tagged with $tag"
 fi
 
 cd $sourceDir
