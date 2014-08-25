@@ -81,7 +81,7 @@ cp -rf $sourceDir .
 
 git add .
 git diff --cached --exit-code --quiet
-$changed = $?
+changed=$?
 
 if[[$changed -eq 1]]
 then
