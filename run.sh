@@ -96,7 +96,6 @@ cp -rf $sourceDir .
 
 git add .
 
-
 if git diff --cached --exit-code --quiet
 then
   success "Nothing changed. We do not need to push"
@@ -112,6 +111,18 @@ else
   fi
 fi
 
+if [ -n "$WERCKER_GIT_PUSH_TAG" ]
+then
+  sudo apt-get -y install jq
+  case $WERCKER_GIT_PUSH_TAG in
+    "bower") tag="$(cat bower.json | jq .version)";;
+    "node") tag="$(cat package.json | jq .version)";;
+    *) tag=$WERCKER_GIT_PUSH_TAG;;
+  esac
+  git tag -a $tag -f
+  git push --tags
+fi
+
 unset WERCKER_GIT_PUSH_BASEDIR
 unset WERCKER_GIT_PUSH_BRANCH
 unset WERCKER_GIT_PUSH_DISCARD_HISTORY
@@ -120,3 +131,4 @@ unset WERCKER_GIT_PUSH_GH_PAGES_DOMAIN
 unset WERCKER_GIT_PUSH_GH_TOKEN
 unset WERCKER_GIT_PUSH_HOST
 unset WERCKER_GIT_PUSH_REPO
+unset WERCKER_GIT_PUSH_TAG
