@@ -75,8 +75,7 @@ else
   info "2"
   cd $targetDir
   info "3"
-  git ls-remote --exit-code . origin/$branch
-  info "4"
+  git ls-remote --exit-code . origin/$branch || true
   if [[ $? -eq 0 ]]
   then
     info "Branch $branch exists on remote"
@@ -84,7 +83,7 @@ else
   else
     git checkout -b $branch
   fi
-  info "5"
+  info "4"
   thisbranch=$branch
 fi
 
@@ -95,7 +94,7 @@ cp -rf $sourceDir .
 
 git add .
 git diff --cached --exit-code --quiet
-info "6"
+info "5"
 
 if [[ $? -ne 0 ]]
 then
