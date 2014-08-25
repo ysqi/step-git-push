@@ -1,6 +1,8 @@
 #!/bin/sh
+set -e
+set +o pipefail
 
-info "using settings $WERCKER_GIT_BRANCH $WERCKER_GIT_PUSH_BASEDIR $WERCKER_GIT_PUSH_BRANCH $WERCKER_GIT_PUSH_DISCARD_HISTORY $WERCKER_GIT_PUSH_GH_PAGES $WERCKER_GIT_PUSH_GH_PAGES_DOMAIN $WERCKER_GIT_PUSH_HOST $WERCKER_GIT_PUSH_REPO $WERCKER_GIT_REPOSITORY $WERCKER_STARTED_BY"
+info "using 3.14 settings $WERCKER_GIT_BRANCH $WERCKER_GIT_PUSH_BASEDIR $WERCKER_GIT_PUSH_BRANCH $WERCKER_GIT_PUSH_DISCARD_HISTORY $WERCKER_GIT_PUSH_GH_PAGES $WERCKER_GIT_PUSH_GH_PAGES_DOMAIN $WERCKER_GIT_PUSH_HOST $WERCKER_GIT_PUSH_REPO $WERCKER_GIT_REPOSITORY $WERCKER_STARTED_BY"
 
 # use repo option or guess from git info
 if [ -n "$WERCKER_GIT_PUSH_REPO" ]
@@ -72,15 +74,16 @@ then
 else
   git clone $remote $targetDir
   cd $targetDir
-  git ls-remote --exit-code . origin/$branch
-  if [[ $? -eq 0 ]]
+  if git ls-remote --exit-code . origin/$branch
   then
-    info "Branch $branch exists on remote"
     git checkout $branch
     thisbranch=$branch
+    info "Branch $branch exists on remote"
   else
-    info "Branch $branch does not exist on remote"
-    rm -rf * .*
+    cd
+    rm -rf $targetDir
+    mkdir -p $targetDir
+    cd $targetDir
     git init
     thisbranch="master"
   fi
@@ -92,9 +95,12 @@ git config user.name "werckerbot"
 cp -rf $sourceDir .
 
 git add .
-git diff --cached --exit-code --quiet
-if [[ $? -ne 0 ]]
+
+
+if git diff --cached --exit-code --quiet
 then
+  success "Nothing changed. We do not need to push"
+else
   git commit -am "deploy from $WERCKER_STARTED_BY" --allow-empty
   result="$(git push -f $remote $thisbranch:$branch)"
   if [[ $? -ne 0 ]]
@@ -104,8 +110,6 @@ then
   else
     success "pushed to to $branch on $remote"
   fi
-else
-    success "Nothing changed. We do not need to push"
 fi
 
 unset WERCKER_GIT_PUSH_BASEDIR
