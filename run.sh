@@ -72,7 +72,7 @@ then
 else
   git clone $remote $targetDir
   cd $targetDir
-  git ls-remote --exit-code . origin/$branch
+  git ls-remote --exit-code . origin/$branch &> /dev/null
   if [[ $? -eq 0 ]]
   then
     info "Branch $branch exists on remote"
@@ -89,7 +89,7 @@ git config user.name "werckerbot"
 cp -rf $sourceDir .
 
 git add .
-git diff --cached --exit-code
+git diff --cached --exit-code --quiet
 
 if [[ $? -ne 0 ]]
 then
@@ -105,3 +105,12 @@ then
 else
     success "Nothing changed. We do not need to push"
 fi
+
+unset WERCKER_GIT_PUSH_BASEDIR
+unset WERCKER_GIT_PUSH_BRANCH
+unset WERCKER_GIT_PUSH_DISCARD_HISTORY
+unset WERCKER_GIT_PUSH_GH_PAGES
+unset WERCKER_GIT_PUSH_GH_PAGES_DOMAIN
+unset WERCKER_GIT_PUSH_GH_TOKEN
+unset WERCKER_GIT_PUSH_HOST
+unset WERCKER_GIT_PUSH_REPO
