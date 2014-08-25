@@ -80,20 +80,19 @@ git config user.name "werckerbot"
 cp -rf $sourceDir .
 
 git add .
-git commit -am "deploy from $WERCKER_STARTED_BY" --allow-empty
-changed="$(git whatchanged -1 --format=oneline | wc -l)"
+git diff --cached --exit-code --quiet
+$changed = $?
 
-info "$changed files changed"
-
-if[[$changed -gt 1]]
+if[[$changed -eq 1]]
 then
+  git commit -am "deploy from $WERCKER_STARTED_BY" --allow-empty
   result="$(git push -f $remote $thisbranch:$branch)"
   if [[ $? -ne 0 ]]
   then
     warning "$result"
-    fail "failed pushing to github pages"
+    fail "failed pushing to $branch on $remote"
   else
-    success "pushed to github pages"
+    success "pushed to to $branch on $remote"
   fi
 else
     success "Nothing changed. We do not need to push"
