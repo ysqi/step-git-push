@@ -70,21 +70,20 @@ then
   git init
   thisbranch="master"
 else
-  info "1"
   git clone $remote $targetDir
-  info "2"
   cd $targetDir
-  info "3"
-  git ls-remote --exit-code . origin/$branch || true
+  git ls-remote --exit-code . origin/$branch
   if [[ $? -eq 0 ]]
   then
     info "Branch $branch exists on remote"
     git checkout $branch
+    thisbranch=$branch
   else
-    git checkout -b $branch
+    info "Branch $branch does not exist on remote"
+    rm -rf * .*
+    git init
+    thisbranch="master"
   fi
-  info "4"
-  thisbranch=$branch
 fi
 
 git config user.email "pleasemailus@wercker.com"
@@ -94,8 +93,6 @@ cp -rf $sourceDir .
 
 git add .
 git diff --cached --exit-code --quiet
-info "5"
-
 if [[ $? -ne 0 ]]
 then
   git commit -am "deploy from $WERCKER_STARTED_BY" --allow-empty
