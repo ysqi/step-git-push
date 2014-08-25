@@ -57,6 +57,18 @@ then
   fi
 fi
 
+if [ -n "$WERCKER_GIT_PUSH_TAG" ]
+then
+  wget https://stedolan.github.io/jq/download/linux64/jq
+  chmod +x jq
+  case $WERCKER_GIT_PUSH_TAG in
+    "bower") tag="$(cat bower.json | ./jq .version)";;
+    "node") tag="$(cat package.json | ./jq .version)";;
+    *) tag=$WERCKER_GIT_PUSH_TAG;;
+  esac
+  rm jq
+fi
+
 cd $sourceDir
 rm -rf .git
 
@@ -113,12 +125,6 @@ fi
 
 if [ -n "$WERCKER_GIT_PUSH_TAG" ]
 then
-  sudo apt-get -y install jq
-  case $WERCKER_GIT_PUSH_TAG in
-    "bower") tag="$(cat bower.json | jq .version)";;
-    "node") tag="$(cat package.json | jq .version)";;
-    *) tag=$WERCKER_GIT_PUSH_TAG;;
-  esac
   git tag -a $tag -f
   git push --tags
 fi
