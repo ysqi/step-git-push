@@ -123,7 +123,7 @@ fi
 
 if [ -n "$WERCKER_GIT_PUSH_TAG" ]
 then
-  git tag -a $tag -f
+  git tag -a $tag -m "Tagged by $WERCKER_STARTED_BY" -f
   git push --tags
 fi
 
