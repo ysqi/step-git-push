@@ -81,9 +81,8 @@ cp -rf $sourceDir .
 
 git add .
 git diff --cached --exit-code --quiet
-changed=$?
 
-if[[$changed -eq 1]]
+if[[$? -ne 0]]
 then
   git commit -am "deploy from $WERCKER_STARTED_BY" --allow-empty
   result="$(git push -f $remote $thisbranch:$branch)"
