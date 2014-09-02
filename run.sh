@@ -28,12 +28,12 @@ else
   fail "missing option \"gh_token\" or \"host\", aborting"
 fi
 
-sourceDir=$(pwd)
+sourceDir=$(pwd)/
 
 # if directory provided, cd to it
 if [ -d "$WERCKER_GIT_PUSH_BASEDIR" ]
 then
-  sourceDir="$sourceDir/$WERCKER_GIT_PUSH_BASEDIR/"
+  sourceDir="$sourceDir$WERCKER_GIT_PUSH_BASEDIR/"
 fi
 
 # setup branch
@@ -102,7 +102,7 @@ fi
 git config user.email "pleasemailus@wercker.com"
 git config user.name "werckerbot"
 
-cp -rf $sourceDir .
+cp -rf $sourceDir* .
 
 git add .
 
