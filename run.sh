@@ -126,6 +126,7 @@ then
   if git tag -l | grep $tag
     info "tag $tag exists"
     if [ -n "$WERCKER_GIT_PUSH_TAG_OVERWRITE" ]
+    then
       info "tag $tag will be overwritten"
       git tag -d $tag
       git push origin :refs/tags/$tag
