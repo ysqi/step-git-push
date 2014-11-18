@@ -123,8 +123,19 @@ fi
 
 if [ -n "$WERCKER_GIT_PUSH_TAG" ]
 then
-  git tag -a $tag -m "Tagged by $WERCKER_STARTED_BY" -f
-  git push --tags
+  if git tag -l | grep $tag
+    info "tag $tag exists"
+    if [ -n "$WERCKER_GIT_PUSH_TAG_OVERWRITE" ]
+      info "tag $tag will be overwritten"
+      git tag -d $tag
+      git push origin :refs/tags/$tag
+      git tag -a $tag -m "Tagged by $WERCKER_STARTED_BY" -f
+      git push --tags
+    fi
+  else
+    git tag -a $tag -m "Tagged by $WERCKER_STARTED_BY" -f
+    git push --tags
+  fi
 fi
 
 unset WERCKER_GIT_PUSH_BASEDIR
@@ -136,3 +147,4 @@ unset WERCKER_GIT_PUSH_GH_TOKEN
 unset WERCKER_GIT_PUSH_HOST
 unset WERCKER_GIT_PUSH_REPO
 unset WERCKER_GIT_PUSH_TAG
+unset WERCKER_GIT_OVERWRITE_TAG

@@ -16,6 +16,7 @@ You either have to define a `gh_token` if you deploy to github or a `host` if yo
 - `gh_pages` *optional* Set this to true if you want to deploy to [Github Pages](http://pages.github.com/). The Branch will be set accordingly.
 - `gh_pages_domain` *optional* Custom domain ([documentation](https://help.github.com/articles/setting-up-a-custom-domain-with-pages))
 - `tag` *optional* Adds a tag to the pushed commit. Valid options are bower, node or any string.
+- `tag_overwrite` *optional* If set, tags will be overwritten
 
 ## Example
 
