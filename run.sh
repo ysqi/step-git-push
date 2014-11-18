@@ -124,6 +124,7 @@ fi
 if [ -n "$WERCKER_GIT_PUSH_TAG" ]
 then
   if git tag -l | grep $tag
+  then
     info "tag $tag exists"
     if [ -n "$WERCKER_GIT_PUSH_TAG_OVERWRITE" ]
     then
