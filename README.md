@@ -12,6 +12,7 @@ You either have to define a `gh_token` if you deploy to github or a `host` if yo
 - `repo` *optional* Set this to a repo like "username/repo". Defaults to your build repo.
 - `branch` *optional* If set this branch will be used as deploy goal. Defaults to build master
 - `basedir` *optional* Set this if your build step outputs to a folder
+- `destdir` *optional* Speficies the directory in the remote repo to copy the files to
 - `discard_history` **DANGER** *optional* Discards history of that branch. Use with care as it could destroy your whole programming history.
 - `gh_pages` *optional* Set this to true if you want to deploy to [Github Pages](http://pages.github.com/). The Branch will be set accordingly.
 - `gh_pages_domain` *optional* Custom domain ([documentation](https://help.github.com/articles/setting-up-a-custom-domain-with-pages))
