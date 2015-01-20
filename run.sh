@@ -67,6 +67,10 @@ then
   info "The commit will be tagged with $tag"
 fi
 
+if [ -z "$WERCKER_GIT_PUSH_DESTDIR" ]; then
+  WERCKER_GIT_PUSH_DESTDIR=/
+fi
+
 cd $sourceDir
 rm -rf .git
 
@@ -102,7 +106,7 @@ fi
 git config user.email "pleasemailus@wercker.com"
 git config user.name "werckerbot"
 
-cp -rf $sourceDir* .
+cp -rf $sourceDir* .$WERCKER_GIT_PUSH_DESTDIR
 
 git add .
 
