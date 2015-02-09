@@ -111,7 +111,8 @@ fi
 git config user.email "pleasemailus@wercker.com"
 git config user.name "werckerbot"
 
-cp -rf $sourceDir* .$WERCKER_GIT_PUSH_DESTDIR
+mkdir -p ./$WERCKER_GIT_PUSH_DESTDIR
+cp -rf $sourceDir* ./$WERCKER_GIT_PUSH_DESTDIR
 
 git add .
 
