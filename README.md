@@ -9,6 +9,7 @@ You either have to define a `gh_token` if you deploy to github or a `host` if yo
 
 - `gh_token` *optional* Github API access token, if you want to deploy to github. ([documentation](https://github.com/blog/1509-personal-api-tokens)). **don't share this on a public repo, use an environment variable!**
 - `host` *optional* Set this to a host like "example.org". Defaults to your build host or github if `gh_token` is used.
+- `user` *optional* Set this to the ssh user of your git instance. Defaults to git.
 - `repo` *optional* Set this to a repo like "username/repo". Defaults to your build repo.
 - `branch` *optional* If set this branch will be used as deploy goal. Defaults to build master
 - `basedir` *optional* Set this if your build step outputs to a folder
