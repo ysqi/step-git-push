@@ -2,14 +2,19 @@
 set -e
 set +o pipefail
 
-info "using 3.14 settings $WERCKER_GIT_BRANCH $WERCKER_GIT_PUSH_BASEDIR $WERCKER_GIT_PUSH_DESTDIR $WERCKER_GIT_PUSH_BRANCH $WERCKER_GIT_PUSH_DISCARD_HISTORY $WERCKER_GIT_PUSH_GH_PAGES $WERCKER_GIT_PUSH_GH_PAGES_DOMAIN $WERCKER_GIT_PUSH_HOST $WERCKER_GIT_PUSH_REPO $WERCKER_GIT_REPOSITORY $WERCKER_STARTED_BY"
-
 # use repo option or guess from git info
 if [ -n "$WERCKER_GIT_PUSH_REPO" ]
 then
   repo="$WERCKER_GIT_PUSH_REPO"
 else
   repo="$WERCKER_GIT_OWNER/$WERCKER_GIT_REPOSITORY"
+fi
+
+if [ -n "$WERCKER_GIT_PUSH_USER" ]
+then
+  git_user="$WERCKER_GIT_PUSH_USER"
+else
+  git_user="git"
 fi
 
 info "using github repo \"$repo\""
@@ -22,7 +27,7 @@ then
   info "using github token"
 elif [ -n "$WERCKER_GIT_PUSH_HOST" ]
 then
-  remote="git@$WERCKER_GIT_PUSH_HOST:$repo.git"
+  remote="$git_user@$WERCKER_GIT_PUSH_HOST:$repo.git"
   info "using git ssh: $remote"
 else
   fail "missing option \"gh_token\" or \"host\", aborting"
@@ -155,3 +160,4 @@ unset WERCKER_GIT_PUSH_GH_PAGES
 unset WERCKER_GIT_PUSH_GH_PAGES_DOMAIN
 unset WERCKER_GIT_PUSH_TAG
 unset WERCKER_GIT_PUSH_TAG_OVERWRITE
+unset WERCKER_GIT_PUSH_USER
