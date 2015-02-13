@@ -65,8 +65,8 @@ fi
 if [ -n "$WERCKER_GIT_PUSH_TAG" ]
 then
   case $WERCKER_GIT_PUSH_TAG in
-    "bower") tag="$(cat bower.json | python -c 'import sys, json; print json.load(sys.stdin)["version"]')";;
-    "node") tag="$(cat package.json | python -c 'import sys, json; print json.load(sys.stdin)["version"]')";;
+    "bower") tag="$(cat $sourceDirbower.json | python -c 'import sys, json; print json.load(sys.stdin)["version"]')";;
+    "node") tag="$(cat $sourceDirpackage.json | python -c 'import sys, json; print json.load(sys.stdin)["version"]')";;
     *) tag=$WERCKER_GIT_PUSH_TAG;;
   esac
   info "The commit will be tagged with $tag"
