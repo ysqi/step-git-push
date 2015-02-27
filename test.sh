@@ -100,10 +100,9 @@ cd $currDir; rm -rf foo
 
 ## Test cloning of repo
 
-
-cloneRepo "https://"$WERCKER_GH_TOKEN"@github.com/leipert/step-git-push.git" $(pwd)/foo
+cloneRepo "git@github.com:leipert/step-git-push.git" $(pwd)/foo
 cd $currDir; rm -rf foo
-cloneRepo "https://"$WERCKER_GH_TOKEN"@github.com/leipert/non-existing.git" $(pwd)/foo
+cloneRepo "git@github.com:leipert/non-existing.git" $(pwd)/foo
 
 #source $(dirname $0)//run.sh
 

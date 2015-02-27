@@ -1,6 +1,8 @@
 box: wercker/default
 build:
   steps:
+    - add-ssh-key-gh-bb:
+       keyname: TEST_SSH
     - script:
        name: Run tests
        code: bash test.sh
