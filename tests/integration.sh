@@ -24,7 +24,6 @@ function init {
   cd $currDir
   WERCKER_GIT_PUSH_REPO="leipert/xkcd-now-clock"
   WERCKER_GIT_PUSH_BRANCH="step-git-push-test"
-  echo "$GH_TOKEN"
   if [ -n "$GH_TOKEN" ]; then
     WERCKER_GIT_PUSH_GH_OAUTH="$GH_TOKEN"
   else
@@ -43,12 +42,11 @@ init
 source $currDir/run.sh
 
 init
-unset WERCKER_GIT_PUSH_GH_OAUTH
 WERCKER_GIT_PUSH_GH_PAGES_DOMAIN="foo2.bar"
 WERCKER_GIT_PUSH_TAG_OVERWRITE="true"
 source $currDir/run.sh
 
 init
 cd /tmp/git-push
-git push $(getRemoteURL) --delete $WERCKER_GIT_PUSH_TAG
-git push $(getRemoteURL) --delete $WERCKER_GIT_PUSH_BRANCH
+git push $(getRemoteURL) --delete $WERCKER_GIT_PUSH_TAG >/dev/null 2>&1
+git push $(getRemoteURL) --delete $WERCKER_GIT_PUSH_BRANCH >/dev/null 2>&1
