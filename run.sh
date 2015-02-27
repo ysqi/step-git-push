@@ -2,6 +2,11 @@
 set -e
 set +o pipefail
 
+if [ -n "$WERCKER_GIT_PUSH_GH_TOKEN" ]; then
+  setMessage "Your gh_token may be compromised. Please check https://github.com/leipert/step-git-push for more info"
+  WERCKER_GIT_PUSH_GH_OAUTH=$WERCKER_GIT_PUSH_GH_TOKEN
+fi
+
 # LOAD OUR FUNCTIONS
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 . ${DIR}/functions.sh
@@ -39,8 +44,7 @@ if [ -n "$WERCKER_GIT_PUSH_DISCARD_HISTORY" ]; then
   initEmptyRepoAt $targetDir
 else
   cloneRepo $remoteURL $targetDir
-  if checkBranchExistence $targetDir $remoteBranch
-  then
+  if checkBranchExistence $targetDir $remoteBranch; then
     checkoutBranch $targetDir $remoteBranch
     localBranch=$remoteBranch
     s_info "branch $remoteBranch exists on remote $remoteURL"
@@ -70,22 +74,18 @@ cd $targetDir
 
 git add . > /dev/null
 
-if git diff --cached --exit-code --quiet
-then
+if git diff --cached --exit-code --quiet; then
   s_success "Nothing changed. We do not need to push"
 else
   git commit -am "[ci skip] deploy from $WERCKER_STARTED_BY" --allow-empty > /dev/null
   pushBranch $remoteURL $localBranch $remoteBranch
 fi
 
-if [ -n "$WERCKER_GIT_PUSH_TAG" ]
-then
+if [ -n "$WERCKER_GIT_PUSH_TAG" ]; then
   tags="$(git tag -l)"
-  if [[ "$tags" =~ "$tag" ]]
-  then
+  if [[ "$tags" =~ "$tag" ]]; then
     s_info "tag $tag already exists"
-    if [ -n "$WERCKER_GIT_PUSH_TAG_OVERWRITE" ]
-    then
+    if [ -n "$WERCKER_GIT_PUSH_TAG_OVERWRITE" ]; then
       if git diff --exit-code --quiet $localBranch $tag; then
         s_success "Nothing changed. We do not need to overwrite tag $tag"
       else

@@ -2,6 +2,17 @@
 
 A [wercker](http://wercker.com/) step to deploy to a certain git branch in a repo. Supports also [Github Pages](http://pages.github.com/).
 
+# IMPORTANT SECURITY NOTICE:
+
+If your wercker app is public and you use the setting `gh_token`, it could be that your Auth token has been compromised.
+
+Please change your token as quick as possible [here](https://github.com/settings/applications#personal-access-tokens)
+and use the `gh_oauth` option instead of `gh_token`.
+
+Sorry for the inconvience. I reworked the complete wercker step, added unit and integration tests and more importantly there is now a function, which replaces oauth tokens in logs with `oauth-token`.
+
+Starting 01st March 2015 the `gh_token` option will be removed and thus not work anymore.
+
 ## Options
 
 You either have to define a `gh_oauth` token if you deploy to github or a `host` if you want to deploy via SSH.
@@ -27,7 +38,7 @@ For Github Pages:
 deploy:
   steps:
     - git-push:
-         gh_oauth: $GIT_TOKEN
+         gh_oauth: $GH_TOKEN
          gh_pages: true
          gh_pages_domain: example.org
          basedir: build

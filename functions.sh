@@ -30,8 +30,7 @@ function s_setMessage {
 
 # RETURNS REPO_PATH SET in GIT_PUSH or current WERCKER
 function getRepoPath {
-  if [ -n "$WERCKER_GIT_PUSH_REPO" ]
-  then
+  if [ -n "$WERCKER_GIT_PUSH_REPO" ]; then
     echo "$WERCKER_GIT_PUSH_REPO"
   else
     echo "$WERCKER_GIT_OWNER/$WERCKER_GIT_REPOSITORY"
@@ -148,8 +147,7 @@ function createCNAME {
 
 function pushBranch {
   result="$(git push -q -f $1 $2:$3 2>&1)"
-  if [[ $? -ne 0 ]]
-  then
+  if [[ $? -ne 0 ]]; then
     s_warning "$result"
     s_fail "failed pushing to $3 on $1"
   else
@@ -160,8 +158,7 @@ function pushBranch {
 function pushTag {
   git tag -a $2 -m "Tagged by $WERCKER_STARTED_BY" -f
   result="$(git push --tags $1 2>&1)"
-  if [[ $? -ne 0 ]]
-  then
+  if [[ $? -ne 0 ]]; then
     s_warning "$result"
     s_fail "failed pushing to tag $1 with $2"
   else
@@ -172,8 +169,7 @@ function pushTag {
 function deleteTag {
   git tag -d $2 > /dev/null
   result="$(git push $1 --delete refs/tags/$2 2>&1)"
-  if [[ $? -ne 0 ]]
-  then
+  if [[ $? -ne 0 ]]; then
     s_warning "$result"
     s_fail "failed delete $2 from $1"
   fi
