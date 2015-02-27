@@ -4,11 +4,11 @@ A [wercker](http://wercker.com/) step to deploy to a certain git branch in a rep
 
 ## Options
 
-You either have to define a `gh_token` if you deploy to github or a `host` if you want to deploy via SSH.
+You either have to define a `gh_oauth` token if you deploy to github or a `host` if you want to deploy via SSH.
 (Please use wercker steps `leipert/add-ssh-key-gh-bb` and `add-to-known_hosts` to setup your SSH token for github and bitbucket)
 
-- `gh_token` *optional* Github API access token, if you want to deploy to github. ([documentation](https://github.com/blog/1509-personal-api-tokens)). **don't share this on a public repo, use an environment variable!**
-- `host` *optional* Set this to a host like "example.org". Defaults to your build host or github if `gh_token` is used.
+- `gh_oauth` *optional* Github API access token, if you want to deploy to github. ([documentation](https://github.com/blog/1509-personal-api-tokens)). **don't share this on a public repo, use an environment variable!**
+- `host` *optional* Set this to a host like "example.org". Defaults to your build host or github if `gh_oauth` is used.
 - `user` *optional* Set this to the ssh user of your git instance. Defaults to git.
 - `repo` *optional* Set this to a repo like "username/repo". Defaults to your build repo.
 - `branch` *optional* If set this branch will be used as deploy goal. Defaults to build master
@@ -27,7 +27,7 @@ For Github Pages:
 deploy:
   steps:
     - git-push:
-         gh_token: $GIT_TOKEN
+         gh_oauth: $GIT_TOKEN
          gh_pages: true
          gh_pages_domain: example.org
          basedir: build

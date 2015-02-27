@@ -1,31 +1,31 @@
 #!/bin/bash
 
 function sanitizeOutput {
-  echo $1 | sed -E 's_(.+://).+@_\1oauth-token@_g'
+  echo "$@" | sed -E 's_(.+://).+@_\1oauth-token@_g'
 }
 
 function s_info {
-  info $(sanitizeOutput $1)
+  info "$(sanitizeOutput $@)"
 }
 
 function s_success {
-  success $(sanitizeOutput $1)
+  success "$(sanitizeOutput $@)"
 }
 
 function s_debug {
-  debug $(sanitizeOutput $1)
+  debug "$(sanitizeOutput $@)"
 }
 
 function s_warning {
-  warning $(sanitizeOutput $1)
+  warning "$(sanitizeOutput $@)"
 }
 
 function s_fail {
-  fail $(sanitizeOutput $1)
+  fail "$(sanitizeOutput $@)"
 }
 
 function s_setMessage {
-  setMessage $(sanitizeOutput $1)
+  setMessage "$(sanitizeOutput $@)"
 }
 
 # RETURNS REPO_PATH SET in GIT_PUSH or current WERCKER
@@ -39,15 +39,15 @@ function getRepoPath {
 }
 
 #RETURNS FULL REMOTE PATH OF THE REPO
-function getRepoURL {
+function getRemoteURL {
   repo=$(getRepoPath)
-  if [ -n "$WERCKER_GIT_PUSH_GH_TOKEN" ]; then
-    echo "https://$WERCKER_GIT_PUSH_GH_TOKEN@github.com/$repo.git"
+  if [ -n "$WERCKER_GIT_PUSH_GH_OAUTH" ]; then
+    echo "https://$WERCKER_GIT_PUSH_GH_OAUTH@github.com/$repo.git"
   elif [ -n "$WERCKER_GIT_PUSH_HOST" ]; then
     git_user=$(getGitSSHUser)
     echo "$git_user@$WERCKER_GIT_PUSH_HOST:$repo.git"
   else
-    exit -1
+    echo ""
   fi
 }
 
@@ -141,6 +141,40 @@ function getTag {
 
 function createCNAME {
   if [ -n "$WERCKER_GIT_PUSH_GH_PAGES_DOMAIN" ]; then
-    echo $WERCKER_GIT_PUSH_GH_PAGES_DOMAIN > "$1CNAME"
+    echo $WERCKER_GIT_PUSH_GH_PAGES_DOMAIN > "$1/CNAME"
+    s_info "Will create CNAME file: $1/CNAME"
+  fi
+}
+
+function pushBranch {
+  result="$(git push -q -f $1 $2:$3 2>&1)"
+  if [[ $? -ne 0 ]]
+  then
+    s_warning "$result"
+    s_fail "failed pushing to $3 on $1"
+  else
+    s_success "pushed to $3 on $1"
+  fi
+}
+
+function pushTag {
+  git tag -a $2 -m "Tagged by $WERCKER_STARTED_BY" -f
+  result="$(git push --tags $1 2>&1)"
+  if [[ $? -ne 0 ]]
+  then
+    s_warning "$result"
+    s_fail "failed pushing to tag $1 with $2"
+  else
+    s_success "tagged $1 with $2"
+  fi
+}
+
+function deleteTag {
+  git tag -d $2 > /dev/null
+  result="$(git push $1 --delete refs/tags/$2 2>&1)"
+  if [[ $? -ne 0 ]]
+  then
+    s_warning "$result"
+    s_fail "failed delete $2 from $1"
   fi
 }

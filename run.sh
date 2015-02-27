@@ -8,11 +8,12 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 repo=$(getRepoPath)
 
-s_info "using github repo \"$repo\""
+info "using github repo \"$repo\""
 
-remoteURL=$(getRepoURL)
-if [[ $? -ne 0 ]]; then
-  s_fail "missing option \"gh_oauth_token\" or \"host\", aborting"
+remoteURL=$(getRemoteURL)
+echo "$remoteURL"
+if [ -z $remoteURL ]; then
+  s_fail "missing option \"gh_oauth\" or \"host\", aborting"
 fi
 s_info "remote URL will be $remoteURL"
 
@@ -49,6 +50,8 @@ else
   fi
 fi
 
+info "Initialized Repo in $targetDir"
+
 cd $targetDir
 
 mkdir -p ./$WERCKER_GIT_PUSH_DESTDIR
@@ -60,10 +63,11 @@ git config user.name "werckerbot"
 # generate cname file
 createCNAME $targetDir
 
-exit
 
-tag=$(getTag) $baseDir
+tag=$(getTag $baseDir)
 s_info "The commit will be tagged with $tag"
+
+cd $targetDir
 
 git add . > /dev/null
 
@@ -71,15 +75,8 @@ if git diff --cached --exit-code --quiet
 then
   s_success "Nothing changed. We do not need to push"
 else
-  git commit -am "deploy from $WERCKER_STARTED_BY" --allow-empty > /dev/null
-  result="$(git push -q -f $remoteURL $localBranch:$remoteBranch)"
-  if [[ $? -ne 0 ]]
-  then
-    warning "$result"
-    s_fail "failed pushing to $remoteBranch on $remoteURL"
-  else
-    s_success "pushed to to $remoteBranch on $remoteURL"
-  fi
+  git commit -am "[ci skip] deploy from $WERCKER_STARTED_BY" --allow-empty > /dev/null
+  pushBranch $remoteURL $localBranch $remoteBranch
 fi
 
 if [ -n "$WERCKER_GIT_PUSH_TAG" ]
@@ -90,19 +87,20 @@ then
     s_info "tag $tag already exists"
     if [ -n "$WERCKER_GIT_PUSH_TAG_OVERWRITE" ]
     then
-      s_info "tag $tag will be overwritten"
-      git tag -d $tag
-      git push origin :refs/tags/$tag
-      git tag -a $tag -m "Tagged by $WERCKER_STARTED_BY" -f
-      git push --tags
+      if git diff --exit-code --quiet $localBranch $tag; then
+        s_success "Nothing changed. We do not need to overwrite tag $tag"
+      else
+        s_info "tag $tag will be overwritten"
+        deleteTag $remoteURL $tag
+        pushTag $remoteURL $tag
+      fi
     fi
   else
-    git tag -a $tag -m "Tagged by $WERCKER_STARTED_BY" -f
-    git push --tags
+      pushTag $remoteURL $tag
   fi
 fi
 
-unset WERCKER_GIT_PUSH_GH_TOKEN
+unset WERCKER_GIT_PUSH_GH_OAUTH
 unset WERCKER_GIT_PUSH_HOST
 unset WERCKER_GIT_PUSH_REPO
 unset WERCKER_GIT_PUSH_BRANCH
@@ -114,3 +112,4 @@ unset WERCKER_GIT_PUSH_GH_PAGES_DOMAIN
 unset WERCKER_GIT_PUSH_TAG
 unset WERCKER_GIT_PUSH_TAG_OVERWRITE
 unset WERCKER_GIT_PUSH_USER
+

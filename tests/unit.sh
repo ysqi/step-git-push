@@ -6,30 +6,39 @@ originalFail="# $( type fail 2>/dev/null )"
 failed=false
 throwError=false
 
-function info {
-    echo INFO: $1 > /dev/null
-}
-
-function warning {
-    echo WARNING: $1 > /dev/null
-}
-
-function success {
-    echo SUCCESS: $1 > /dev/null
-}
-
-function fail {
-    failed=true
-    echo FATAL: $1 > /dev/null
-}
-
 function error {
-    echo ERROR: $1
-    throwError=true,
+    echo ERROR: $@
+    throwError=true
 }
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-. ${DIR}/functions.sh
+. ${DIR}/../functions.sh
+
+if [ "$CI" != "true" ]; then
+
+  function s_info {
+    echo INFO: $@
+  }
+
+  function s_warning {
+    echo > /dev/null
+  }
+
+  function success {
+    echo SUCCESS: $@
+  }
+
+  function s_fail {
+    failed=true
+  }
+
+  function fail {
+    echo "FATAL: $@"
+    exit -1
+  }
+
+
+fi
 
 currDir=$(pwd);
 
@@ -65,19 +74,18 @@ unset WERCKER_GIT_PUSH_USER
 
 [ $(getGitSSHUser) != "git" ] && error "$(getGitSSHUser) != git"
 
-## Test getRepoURL
+## Test getRemoteURL
 
-result=$(getRepoURL)
-[[ $? -ne 255 ]] && error "Script should error here"
+[ ! getRemoteURL ] && error "Script should error here"
 
-WERCKER_GIT_PUSH_GH_TOKEN=1234
+WERCKER_GIT_PUSH_GH_OAUTH=1234
 
-[ $(getRepoURL) != "https://1234@github.com/leipert/step-git-push.git" ] && error "$(getRepoURL) != https://1234@github.com/leipert/step-git-push.git"
+[ $(getRemoteURL) != "https://1234@github.com/leipert/step-git-push.git" ] && error "$(getRemoteURL) != https://1234@github.com/leipert/step-git-push.git"
 
-unset WERCKER_GIT_PUSH_GH_TOKEN
+unset WERCKER_GIT_PUSH_GH_OAUTH
 WERCKER_GIT_PUSH_HOST="github.com"
 
-[ $(getRepoURL) != "git@github.com:leipert/step-git-push.git" ] && error "$(getRepoURL) != git@github.com:leipert/step-git-push.git"
+[ $(getRemoteURL) != "git@github.com:leipert/step-git-push.git" ] && error "$(getRemoteURL) != git@github.com:leipert/step-git-push.git"
 
 ## TEST getBranch
 
@@ -113,12 +121,21 @@ initEmptyRepoAt $(pwd)/foo
 cd $currDir; rm -rf foo
 
 ## Test cloning of repo
+if [ -n "$GH_TOKEN" ]; then
+  WERCKER_GIT_PUSH_GH_OAUTH="$GH_TOKEN"
+else
+  WERCKER_GIT_PUSH_HOST="github.com"
+fi
 
-cloneRepo "git@github.com:leipert/non-existing.git" $currDir/foo
+WERCKER_GIT_PUSH_REPO="leipert/non-existing"
+
+cloneRepo $(getRemoteURL) $currDir/foo
 [ $failed != "true" ] && error "A non existing repository should have not be cloned"
 failed=false; cd $currDir; rm -rf foo
 
-cloneRepo "git@github.com:leipert/step-git-push.git" $currDir/foo
+WERCKER_GIT_PUSH_REPO="leipert/step-git-push"
+
+cloneRepo $(getRemoteURL) $currDir/foo
 cd $currDir;
 
 ## Test of whether branch existence test works
@@ -151,14 +168,13 @@ failed=false
 
 ## TEST CNAME Creation
 WERCKER_GIT_PUSH_GH_PAGES_DOMAIN="foo.bar"
-createCNAME $currDir/
+createCNAME $currDir/ > /dev/null
 [ ! -f $currDir/CNAME ] && error "This should create a CNAME file"
 rm -rf $currDir/CNAME
 
-#source $(dirname $0)//run.sh
-
-rm -rf foo
+rm -rf $currDir/foo
 if [ $throwError == "true" ]; then
-  eval "$originalFail"
   fail "Something failed"
+else
+  success "UNIT TESTS RAN SUCCESSFUL"
 fi
