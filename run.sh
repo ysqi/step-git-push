@@ -2,6 +2,12 @@
 set -e
 set +o pipefail
 
+if [ -n "$WERCKER_GIT_PUSH_GH_TOKEN" ]; then
+  setMessage "Your gh_token may be compromised. Please check https://github.com/leipert/step-git-push for more info"
+  WERCKER_GIT_PUSH_GH_OAUTH=$WERCKER_GIT_PUSH_GH_TOKEN
+fi
+
+# LOAD OUR FUNCTIONS
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 . ${DIR}/functions.sh
 
@@ -9,11 +15,11 @@ repo=$(getRepoPath)
 
 info "using github repo \"$repo\""
 
-remote=$(getRepoURL)
-if [[ $? -ne 0 ]]; then
-  warning "$result"
-  fail "missing option \"gh_token\" or \"host\", aborting"
+remoteURL=$(getRemoteURL)
+if [ -z $remoteURL ]; then
+  s_fail "missing option \"gh_oauth\" or \"host\", aborting"
 fi
+s_info "remote URL will be $remoteURL"
 
 baseDir=$(getBaseDir)
 
@@ -27,94 +33,73 @@ fi
 cd $baseDir
 rm -rf .git
 
+localBranch="master"
+
 # remove existing files
 targetDir="/tmp/git-push"
+rm -rf $targetDir
 
 # init repository
 if [ -n "$WERCKER_GIT_PUSH_DISCARD_HISTORY" ]; then
   initEmptyRepoAt $targetDir
-  localBranch="master"
 else
-  rm -rf $targetDir
-  cloneRepo $remote $targetDir
-  cd $targetDir
-  if git ls-remote -q --exit-code . origin/$remoteBranch > /dev/null
-  then
-    result=$(git checkout $remoteBranch -q)
-    if [[ $? -ne 0 ]]; then
-      warning "$result"
-      fail "failed to checkout existing branch $remoteBranch"
-    fi
+  cloneRepo $remoteURL $targetDir
+  if checkBranchExistence $targetDir $remoteBranch; then
+    checkoutBranch $targetDir $remoteBranch
     localBranch=$remoteBranch
-    info "branch $remoteBranch exists on remote"
+    s_info "branch $remoteBranch exists on remote $remoteURL"
   else
     initEmptyRepoAt $targetDir
-    localBranch="master"
   fi
 fi
 
-cd $targetDir
+info "Initialized Repo in $targetDir"
 
-git config user.email "pleasemailus@wercker.com"
-git config user.name "werckerbot"
+cd $targetDir
 
 mkdir -p ./$WERCKER_GIT_PUSH_DESTDIR
 cp -rf $baseDir* ./$WERCKER_GIT_PUSH_DESTDIR
 
-# generate cname file
-if [ -n "$WERCKER_GIT_PUSH_GH_PAGES_DOMAIN" ]; then
-   echo $WERCKER_GIT_PUSH_GH_PAGES_DOMAIN > "$baseDirCNAME"
-fi
+git config user.email "pleasemailus@wercker.com"
+git config user.name "werckerbot"
 
-#TODO: ADD SRCDIR
-if [ -n "$WERCKER_GIT_PUSH_TAG" ]
-then
-  case $WERCKER_GIT_PUSH_TAG in
-    "bower") tag="$(cat bower.json | python -c 'import sys, json; print json.load(sys.stdin)["version"]')";;
-    "node") tag="$(cat package.json | python -c 'import sys, json; print json.load(sys.stdin)["version"]')";;
-    *) tag=$WERCKER_GIT_PUSH_TAG;;
-  esac
-  info "The commit will be tagged with $tag"
-fi
+# generate cname file
+createCNAME $targetDir
+
+
+tag=$(getTag $baseDir)
+s_info "The commit will be tagged with $tag"
+
+cd $targetDir
 
 git add . > /dev/null
 
-if git diff --cached --exit-code --quiet
-then
-  success "Nothing changed. We do not need to push"
+if git diff --cached --exit-code --quiet; then
+  s_success "Nothing changed. We do not need to push"
 else
-  git commit -am "deploy from $WERCKER_STARTED_BY" --allow-empty > /dev/null
-  result="$(git push -q -f $remote $localBranch:$remoteBranch)"
-  if [[ $? -ne 0 ]]
-  then
-    warning "$result"
-    fail "failed pushing to $remoteBranch on $remote"
-  else
-    success "pushed to to $remoteBranch on $remote"
-  fi
+  git commit -am "[ci skip] deploy from $WERCKER_STARTED_BY" --allow-empty > /dev/null
+  pushBranch $remoteURL $localBranch $remoteBranch
 fi
 
-if [ -n "$WERCKER_GIT_PUSH_TAG" ]
-then
+if [ -n "$WERCKER_GIT_PUSH_TAG" ]; then
   tags="$(git tag -l)"
-  if [[ "$tags" =~ "$tag" ]]
-  then
-    info "tag $tag already exists"
-    if [ -n "$WERCKER_GIT_PUSH_TAG_OVERWRITE" ]
-    then
-      info "tag $tag will be overwritten"
-      git tag -d $tag
-      git push origin :refs/tags/$tag
-      git tag -a $tag -m "Tagged by $WERCKER_STARTED_BY" -f
-      git push --tags
+  if [[ "$tags" =~ "$tag" ]]; then
+    s_info "tag $tag already exists"
+    if [ -n "$WERCKER_GIT_PUSH_TAG_OVERWRITE" ]; then
+      if git diff --exit-code --quiet $localBranch $tag; then
+        s_success "Nothing changed. We do not need to overwrite tag $tag"
+      else
+        s_info "tag $tag will be overwritten"
+        deleteTag $remoteURL $tag
+        pushTag $remoteURL $tag
+      fi
     fi
   else
-    git tag -a $tag -m "Tagged by $WERCKER_STARTED_BY" -f
-    git push --tags
+      pushTag $remoteURL $tag
   fi
 fi
 
-unset WERCKER_GIT_PUSH_GH_TOKEN
+unset WERCKER_GIT_PUSH_GH_OAUTH
 unset WERCKER_GIT_PUSH_HOST
 unset WERCKER_GIT_PUSH_REPO
 unset WERCKER_GIT_PUSH_BRANCH
@@ -126,3 +111,4 @@ unset WERCKER_GIT_PUSH_GH_PAGES_DOMAIN
 unset WERCKER_GIT_PUSH_TAG
 unset WERCKER_GIT_PUSH_TAG_OVERWRITE
 unset WERCKER_GIT_PUSH_USER
+

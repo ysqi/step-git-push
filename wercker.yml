@@ -1,8 +1,12 @@
 box: wercker/default
 build:
   steps:
-    - leipert/add-ssh-key-gh-bb@0.0.6:
-       keyname: TEST_SSH
     - script:
-       name: Run tests
-       code: bash test.sh
+       name: Run integration tests
+       code: bash tests/integration.sh
+    - script:
+       name: Run unit tests
+       code: bash tests/unit.sh
+    - script:
+       name: Remove unneeded files
+       code: ls -A | grep -v .yml | grep -v .sh | grep -v .md | xargs rm -rf
