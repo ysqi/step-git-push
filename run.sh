@@ -11,7 +11,6 @@ repo=$(getRepoPath)
 info "using github repo \"$repo\""
 
 remoteURL=$(getRemoteURL)
-echo "$remoteURL"
 if [ -z $remoteURL ]; then
   s_fail "missing option \"gh_oauth\" or \"host\", aborting"
 fi
