@@ -1,5 +1,6 @@
 box: wercker/default
 build:
-  - script:
-     name: Run tests
-     code: ./test.sh
+  steps:
+    - script:
+       name: Run tests
+       code: ./test.sh
