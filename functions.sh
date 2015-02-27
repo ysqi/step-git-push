@@ -1,5 +1,33 @@
 #!/bin/bash
 
+function sanitizeOutput {
+  echo $1 | sed -E 's_(.+://).+@_\1oauth-token@_g'
+}
+
+function s_info {
+  info $(sanitizeOutput $1)
+}
+
+function s_success {
+  success $(sanitizeOutput $1)
+}
+
+function s_debug {
+  debug $(sanitizeOutput $1)
+}
+
+function s_warning {
+  warning $(sanitizeOutput $1)
+}
+
+function s_fail {
+  fail $(sanitizeOutput $1)
+}
+
+function s_setMessage {
+  setMessage $(sanitizeOutput $1)
+}
+
 # RETURNS REPO_PATH SET in GIT_PUSH or current WERCKER
 function getRepoPath {
   if [ -n "$WERCKER_GIT_PUSH_REPO" ]
@@ -70,8 +98,49 @@ function initEmptyRepoAt {
 }
 
 function cloneRepo {
-  result=$(git clone $1 $2 -q)
+  result=$(git clone $1 $2 -q 2>&1)
   if [[ $? -ne 0 ]]; then
-    fail "failed to clone repo"
+    s_warning "$result"
+    s_fail "failed to clone repo"
+  fi
+}
+
+function checkBranchExistence {
+  cd $1
+  git ls-remote -q --exit-code . origin/$2 > /dev/null
+}
+
+function checkoutBranch {
+  cd $1
+  result=$(git checkout $2 -q 2>&1)
+  if [[ $? -ne 0 ]]; then
+    s_warning "$result"
+    s_fail "failed to checkout existing branch $2"
+  fi
+}
+
+function getTagFromJSON {
+  result=$(cat $1$2 | python -c 'import sys, json; print json.load(sys.stdin)["version"]' 2>&1);
+  if [[ $? -ne 0 ]]; then
+    s_warning "$result"
+    s_fail "Could not load version from $1$2"
+  else
+    echo "$result"
+  fi
+}
+
+function getTag {
+  if [ -n "$WERCKER_GIT_PUSH_TAG" ]; then
+    case $WERCKER_GIT_PUSH_TAG in
+      "bower") getTagFromJSON $1 "bower.json" ;;
+      "node") getTagFromJSON $1 "package.json" ;;
+      *) echo $WERCKER_GIT_PUSH_TAG;;
+    esac
+  fi
+}
+
+function createCNAME {
+  if [ -n "$WERCKER_GIT_PUSH_GH_PAGES_DOMAIN" ]; then
+    echo $WERCKER_GIT_PUSH_GH_PAGES_DOMAIN > "$1CNAME"
   fi
 }
