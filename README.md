@@ -11,7 +11,7 @@ and use the `gh_oauth` option instead of `gh_token`.
 
 Sorry for the inconvience. I reworked the complete wercker step, added unit and integration tests and more importantly there is now a function, which replaces oauth tokens in logs with `oauth-token`.
 
-Starting 01st March 2015 the `gh_token` option will be removed and thus not work anymore.
+Builds containing `gh_token` will fail.
 
 ## Options
 

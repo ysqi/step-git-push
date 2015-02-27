@@ -4,7 +4,7 @@ set +o pipefail
 
 if [ -n "$WERCKER_GIT_PUSH_GH_TOKEN" ]; then
   setMessage "Your gh_token may be compromised. Please check https://github.com/leipert/step-git-push for more info"
-  WERCKER_GIT_PUSH_GH_OAUTH=$WERCKER_GIT_PUSH_GH_TOKEN
+  fail "Your gh_token may be compromised. Please check https://github.com/leipert/step-git-push for more info"
 fi
 
 # LOAD OUR FUNCTIONS
