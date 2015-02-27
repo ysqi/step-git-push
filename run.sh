@@ -2,138 +2,102 @@
 set -e
 set +o pipefail
 
-# use repo option or guess from git info
-if [ -n "$WERCKER_GIT_PUSH_REPO" ]
-then
-  repo="$WERCKER_GIT_PUSH_REPO"
-else
-  repo="$WERCKER_GIT_OWNER/$WERCKER_GIT_REPOSITORY"
-fi
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+. ${DIR}/functions.sh
 
-if [ -n "$WERCKER_GIT_PUSH_USER" ]
-then
-  git_user="$WERCKER_GIT_PUSH_USER"
-else
-  git_user="git"
-fi
+repo=$(getRepoPath)
 
 info "using github repo \"$repo\""
 
-# remote path
-# use repo option or guess from git info
-if [ -n "$WERCKER_GIT_PUSH_GH_TOKEN" ]
-then
-  remote="https://$WERCKER_GIT_PUSH_GH_TOKEN@github.com/$repo.git"
-  info "using github token"
-elif [ -n "$WERCKER_GIT_PUSH_HOST" ]
-then
-  remote="$git_user@$WERCKER_GIT_PUSH_HOST:$repo.git"
-  info "using git ssh: $remote"
-else
+remote=$(getRepoURL)
+if [[ $? -ne 0 ]]; then
+  warning "$result"
   fail "missing option \"gh_token\" or \"host\", aborting"
 fi
 
-sourceDir=$(pwd)/
-
-# if directory provided, cd to it
-if [ -d "$WERCKER_GIT_PUSH_BASEDIR" ]
-then
-  sourceDir="$sourceDir$WERCKER_GIT_PUSH_BASEDIR/"
-fi
+baseDir=$(getBaseDir)
 
 # setup branch
-if [ -n "$WERCKER_GIT_PUSH_BRANCH" ]
-then
-  branch="$WERCKER_GIT_PUSH_BRANCH"
-else
-  branch="$WERCKER_GIT_BRANCH"
-fi
-
-# setup github pages
-if [ -n "$WERCKER_GIT_PUSH_GH_PAGES" ]
-then
-  branch="gh-pages"
-  if [[ "$repo" =~ $WERCKER_GIT_OWNER\/$WERCKER_GIT_OWNER\.github\.(io|com)$ ]]; then
-     branch="master"
-  fi
-  # generate cname file
-  if [ -n "$WERCKER_GIT_PUSH_GH_PAGES_DOMAIN" ]; then
-     echo $WERCKER_GIT_PUSH_GH_PAGES_DOMAIN > "$sourceDirCNAME"
-  fi
-fi
-
-if [ -n "$WERCKER_GIT_PUSH_TAG" ]
-then
-  case $WERCKER_GIT_PUSH_TAG in
-    "bower") tag="$(cat "$sourceDir"bower.json | python -c 'import sys, json; print json.load(sys.stdin)["version"]')";;
-    "node") tag="$(cat "$sourceDir"package.json | python -c 'import sys, json; print json.load(sys.stdin)["version"]')";;
-    *) tag=$WERCKER_GIT_PUSH_TAG;;
-  esac
-  info "The commit will be tagged with $tag"
-fi
+remoteBranch=$(getBranch)
 
 if [ -z "$WERCKER_GIT_PUSH_DESTDIR" ]; then
   WERCKER_GIT_PUSH_DESTDIR=/
 fi
 
-cd $sourceDir
+cd $baseDir
 rm -rf .git
 
 # remove existing files
 targetDir="/tmp/git-push"
-rm -rf $targetDir
 
 # init repository
-if [ -n "$WERCKER_GIT_PUSH_DISCARD_HISTORY" ]
-then
-  mkdir -p $targetDir
-  cd $targetDir
-  git init
-  thisbranch="master"
+if [ -n "$WERCKER_GIT_PUSH_DISCARD_HISTORY" ]; then
+  initEmptyRepoAt $targetDir
+  localBranch="master"
 else
-  git clone $remote $targetDir
+  rm -rf $targetDir
+  cloneRepo $remote $targetDir
   cd $targetDir
-  if git ls-remote --exit-code . origin/$branch
+  if git ls-remote -q --exit-code . origin/$remoteBranch > /dev/null
   then
-    git checkout $branch
-    thisbranch=$branch
-    info "Branch $branch exists on remote"
+    result=$(git checkout $remoteBranch -q)
+    if [[ $? -ne 0 ]]; then
+      warning "$result"
+      fail "failed to checkout existing branch $remoteBranch"
+    fi
+    localBranch=$remoteBranch
+    info "branch $remoteBranch exists on remote"
   else
-    cd
-    rm -rf $targetDir
-    mkdir -p $targetDir
-    cd $targetDir
-    git init
-    thisbranch="master"
+    initEmptyRepoAt $targetDir
+    localBranch="master"
   fi
 fi
+
+cd $targetDir
 
 git config user.email "pleasemailus@wercker.com"
 git config user.name "werckerbot"
 
 mkdir -p ./$WERCKER_GIT_PUSH_DESTDIR
-cp -rf $sourceDir* ./$WERCKER_GIT_PUSH_DESTDIR
+cp -rf $baseDir* ./$WERCKER_GIT_PUSH_DESTDIR
 
-git add .
+# generate cname file
+if [ -n "$WERCKER_GIT_PUSH_GH_PAGES_DOMAIN" ]; then
+   echo $WERCKER_GIT_PUSH_GH_PAGES_DOMAIN > "$baseDirCNAME"
+fi
+
+#TODO: ADD SRCDIR
+if [ -n "$WERCKER_GIT_PUSH_TAG" ]
+then
+  case $WERCKER_GIT_PUSH_TAG in
+    "bower") tag="$(cat bower.json | python -c 'import sys, json; print json.load(sys.stdin)["version"]')";;
+    "node") tag="$(cat package.json | python -c 'import sys, json; print json.load(sys.stdin)["version"]')";;
+    *) tag=$WERCKER_GIT_PUSH_TAG;;
+  esac
+  info "The commit will be tagged with $tag"
+fi
+
+git add . > /dev/null
 
 if git diff --cached --exit-code --quiet
 then
   success "Nothing changed. We do not need to push"
 else
-  git commit -am "deploy from $WERCKER_STARTED_BY" --allow-empty
-  result="$(git push -f $remote $thisbranch:$branch)"
+  git commit -am "deploy from $WERCKER_STARTED_BY" --allow-empty > /dev/null
+  result="$(git push -q -f $remote $localBranch:$remoteBranch)"
   if [[ $? -ne 0 ]]
   then
     warning "$result"
-    fail "failed pushing to $branch on $remote"
+    fail "failed pushing to $remoteBranch on $remote"
   else
-    success "pushed to to $branch on $remote"
+    success "pushed to to $remoteBranch on $remote"
   fi
 fi
 
 if [ -n "$WERCKER_GIT_PUSH_TAG" ]
 then
-  if git tag -l | grep $tag
+  tags="$(git tag -l)"
+  if [[ "$tags" =~ "$tag" ]]
   then
     info "tag $tag already exists"
     if [ -n "$WERCKER_GIT_PUSH_TAG_OVERWRITE" ]
