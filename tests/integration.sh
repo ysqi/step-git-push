@@ -1,7 +1,7 @@
 #!/bin/bash
 set +e
 
-if [ "$CI" != "true" ]; then
+#if [ "$CI" != "true" ]; then
   function info {
       echo INFO: $@
   }
@@ -18,7 +18,7 @@ if [ "$CI" != "true" ]; then
       echo FATAL: $@
       exit -1
   }
-fi
+#fi
 
 function init {
   cd $currDir
@@ -49,5 +49,5 @@ source $currDir/run.sh
 
 init
 cd /tmp/git-push
-git push git@github.com:leipert/step-git-push.git --delete $WERCKER_GIT_PUSH_TAG
-git push git@github.com:leipert/step-git-push.git --delete $WERCKER_GIT_PUSH_BRANCH
+git push $(getRemoteURL) --delete $WERCKER_GIT_PUSH_TAG
+git push $(getRemoteURL) --delete $WERCKER_GIT_PUSH_BRANCH
