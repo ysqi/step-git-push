@@ -1,7 +1,7 @@
 box: wercker/default
 build:
   steps:
-    - ainoya/add-ssh-key@1.0.2:
+    - leipert/add-ssh-key-gh-bb@0.0.6:
        keyname: TEST_SSH
     - wercker/add-to-known_hosts@1.4.0:
        hostname: github.com
