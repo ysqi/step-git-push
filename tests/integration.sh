@@ -24,6 +24,7 @@ function init {
   cd $currDir
   WERCKER_GIT_PUSH_REPO="leipert/xkcd-now-clock"
   WERCKER_GIT_PUSH_BRANCH="step-git-push-test"
+  echo "$GH_TOKEN"
   if [ -n "$GH_TOKEN" ]; then
     WERCKER_GIT_PUSH_GH_OAUTH="$GH_TOKEN"
   else
