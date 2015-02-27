@@ -1,20 +1,16 @@
 #!/bin/bash
 set +e
 
-originalFail="# $( type fail 2>/dev/null )"
-
 failed=false
 throwError=false
-
-function error {
-    echo ERROR: $@
-    throwError=true
-}
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 . ${DIR}/../functions.sh
 
-if [ "$CI" != "true" ]; then
+  function error {
+      echo ERROR: $@
+      throwError=true
+  }
 
   function s_info {
     echo INFO: $@
@@ -36,9 +32,6 @@ if [ "$CI" != "true" ]; then
     echo "FATAL: $@"
     exit -1
   }
-
-
-fi
 
 currDir=$(pwd);
 

@@ -1,24 +1,22 @@
 #!/bin/bash
 set +e
 
-#if [ "$CI" != "true" ]; then
-  function info {
-      echo INFO: $@
-  }
+function info {
+    echo INFO: $@
+}
 
-  function warning {
-      echo WARNING: $@
-  }
+function warning {
+    echo WARNING: $@
+}
 
-  function success {
-      echo SUCCESS: $@
-  }
+function success {
+    echo SUCCESS: $@
+}
 
-  function fail {
-      echo FATAL: $@
-      exit -1
-  }
-#fi
+function fail {
+    echo FATAL: $@
+    exit -1
+}
 
 function init {
   cd $currDir
