@@ -1,0 +1,11 @@
+name: git-push
+version: 0.5.6
+description: Deploy to a git branch in a given Repo
+keywords:
+  - github
+  - pages
+  - deploy
+  - git
+  - bitbucket
+  - push
+  - tags
