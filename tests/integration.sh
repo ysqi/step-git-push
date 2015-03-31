@@ -36,13 +36,19 @@ currDir=$( pwd )
 . $currDir/functions.sh
 
 echo $currDir
+
+echo "foo" > $currDir/fixtures/foo
 init
 source $currDir/run.sh
+ls -A /tmp/git-push
+rm -rf $currDir/fixtures/foo
 
 init
+WERCKER_GIT_PUSH_CLEAN_REMOVED_FILES="true"
 WERCKER_GIT_PUSH_GH_PAGES_DOMAIN="foo2.bar"
 WERCKER_GIT_PUSH_TAG_OVERWRITE="true"
 source $currDir/run.sh
+ls -A /tmp/git-push
 
 init
 cd /tmp/git-push

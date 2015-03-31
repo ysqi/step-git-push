@@ -56,8 +56,16 @@ fi
 info "Initialized Repo in $targetDir"
 
 cd $targetDir
-
 mkdir -p ./$WERCKER_GIT_PUSH_DESTDIR
+
+cd ./$WERCKER_GIT_PUSH_DESTDIR
+
+if [ -n "$WERCKER_GIT_PUSH_CLEAN_REMOVED_FILES" ]; then
+  ls -A | grep -v .git | xargs rm -rf
+fi
+
+cd $targetDir
+
 cp -rf $baseDir* ./$WERCKER_GIT_PUSH_DESTDIR
 
 git config user.email "pleasemailus@wercker.com"
@@ -72,7 +80,7 @@ s_info "The commit will be tagged with $tag"
 
 cd $targetDir
 
-git add . > /dev/null
+git add --all . > /dev/null
 
 if git diff --cached --exit-code --quiet; then
   s_success "Nothing changed. We do not need to push"
@@ -100,6 +108,7 @@ if [ -n "$WERCKER_GIT_PUSH_TAG" ]; then
 fi
 
 unset WERCKER_GIT_PUSH_GH_OAUTH
+unset WERCKER_GIT_PUSH_CLEAN_REMOVED_FILES
 unset WERCKER_GIT_PUSH_HOST
 unset WERCKER_GIT_PUSH_REPO
 unset WERCKER_GIT_PUSH_BRANCH
@@ -111,4 +120,3 @@ unset WERCKER_GIT_PUSH_GH_PAGES_DOMAIN
 unset WERCKER_GIT_PUSH_TAG
 unset WERCKER_GIT_PUSH_TAG_OVERWRITE
 unset WERCKER_GIT_PUSH_USER
-
