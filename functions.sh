@@ -1,5 +1,9 @@
 #!/bin/bash
 
+function getAllStepVars {
+  ( set -o posix ; set ) | grep WERCKER_GIT_PUSH | sed -E 's/=.+//g' | xargs
+}
+
 function sanitizeOutput {
   echo "$@" | sed -E 's_(.+://).+@_\1oauth-token@_g'
 }

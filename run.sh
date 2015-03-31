@@ -2,6 +2,14 @@
 set -e
 set +o pipefail
 
+for variable in $(getAllStepVars)
+do
+  if [ "${!variable}" == "false" ]; then
+    s_info "\"$variable\" was set to false, we will unset it therefore"
+    unset $variable
+  fi
+done
+
 if [ -n "$WERCKER_GIT_PUSH_GH_TOKEN" ]; then
   setMessage "Your gh_token may be compromised. Please check https://github.com/leipert/step-git-push for more info"
   fail "Your gh_token may be compromised. Please check https://github.com/leipert/step-git-push for more info"
@@ -76,7 +84,10 @@ createCNAME $targetDir
 
 
 tag=$(getTag $baseDir)
-s_info "The commit will be tagged with $tag"
+
+if [ -n "$tag" ]; then
+  s_info "The commit will be tagged with $tag"
+fi
 
 cd $targetDir
 
@@ -107,16 +118,7 @@ if [ -n "$WERCKER_GIT_PUSH_TAG" ]; then
   fi
 fi
 
-unset WERCKER_GIT_PUSH_GH_OAUTH
-unset WERCKER_GIT_PUSH_CLEAN_REMOVED_FILES
-unset WERCKER_GIT_PUSH_HOST
-unset WERCKER_GIT_PUSH_REPO
-unset WERCKER_GIT_PUSH_BRANCH
-unset WERCKER_GIT_PUSH_BASEDIR
-unset WERCKER_GIT_PUSH_DESTDIR
-unset WERCKER_GIT_PUSH_DISCARD_HISTORY
-unset WERCKER_GIT_PUSH_GH_PAGES
-unset WERCKER_GIT_PUSH_GH_PAGES_DOMAIN
-unset WERCKER_GIT_PUSH_TAG
-unset WERCKER_GIT_PUSH_TAG_OVERWRITE
-unset WERCKER_GIT_PUSH_USER
+for variable in $(getAllStepVars)
+do
+  unset $variable
+done
