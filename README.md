@@ -25,7 +25,7 @@ You either have to define a `gh_oauth` token if you deploy to github or a `host`
 - `branch` *optional* If set this branch will be used as deploy goal. Defaults to build master
 - `basedir` *optional* Set this if your build step outputs to a folder
 - `destdir` *optional* Specifies the directory in the remote repo to copy the files to
-- `CLEAN_REMOVED_FILES` *optional* Cleans removed files if set. Default will keep old files if they are not overwritten.
+- `clean_removed_files` *optional* Cleans removed files if set. Default will keep old files if they are not overwritten.
 - `discard_history` **DANGER** *optional* Discards history of that branch. Use with care as it could destroy your whole programming history.
 - `gh_pages` *optional* Set this to true if you want to deploy to [Github Pages](http://pages.github.com/). The Branch will be set accordingly.
 - `gh_pages_domain` *optional* Custom domain ([documentation](https://help.github.com/articles/setting-up-a-custom-domain-with-pages))
