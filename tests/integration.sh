@@ -41,7 +41,6 @@ echo $currDir
 echo "foo" > $currDir/fixtures/foo
 init
 source $currDir/run.sh
-ls -A /tmp/git-push
 rm -rf $currDir/fixtures/foo
 
 init
@@ -49,15 +48,17 @@ WERCKER_GIT_PUSH_CLEAN_REMOVED_FILES="true"
 WERCKER_GIT_PUSH_GH_PAGES_DOMAIN="foo2.bar"
 WERCKER_GIT_PUSH_TAG_OVERWRITE="true"
 source $currDir/run.sh
-ls -A /tmp/git-push
 
 init
-WERCKER_GIT_PUSH_CLEAN_REMOVED_FILES="true"
+WERCKER_GIT_PUSH_CLEAN_REMOVED_FILES="false"
 WERCKER_GIT_PUSH_GH_PAGES_DOMAIN="false"
 WERCKER_GIT_PUSH_TAG_OVERWRITE="false"
-WERCKER_GIT_PUSH_DESTDIR="dist"
+WERCKER_GIT_PUSH_TAG="bower"
+mkdir -p $currDir/fixtures/dest
+touch $currDir/fixtures/dest/foo
+WERCKER_GIT_PUSH_DESTDIR="dest"
 source $currDir/run.sh
-ls -A /tmp/git-push
+rm -rf $currDir/fixtures/dest
 
 init
 cd /tmp/git-push

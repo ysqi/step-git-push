@@ -125,21 +125,25 @@ function checkoutBranch {
 }
 
 function getTagFromJSON {
-  result=$(cat $1$2 | python -c 'import sys, json; print json.load(sys.stdin)["version"]' 2>&1);
-  if [[ $? -ne 0 ]]; then
-    s_warning "$result"
-    s_fail "Could not load version from $1$2"
+  if [ -f $1$2 ]; then
+    result=$(cat $1$2 | python -c 'import sys, json; print json.load(sys.stdin)["version"]' 2>&1);
+    if [[ $? -ne 0 ]]; then
+      s_warning "$result"
+      s_fail "Could not load version from $1$2"
+    else
+      echo "$result"
+    fi
   else
-    echo "$result"
+    echo "$3"
   fi
 }
 
 function getTag {
-  if [ -n "$WERCKER_GIT_PUSH_TAG" ]; then
-    case $WERCKER_GIT_PUSH_TAG in
-      "bower") getTagFromJSON $1 "bower.json" ;;
-      "node") getTagFromJSON $1 "package.json" ;;
-      *) echo $WERCKER_GIT_PUSH_TAG;;
+  if [ -n "$1" ]; then
+    case $1 in
+      "bower") getTagFromJSON $2 "bower.json" $1 ;;
+      "node") getTagFromJSON $2 "package.json" $1 ;;
+      *) echo $1;;
     esac
   fi
 }

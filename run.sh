@@ -89,18 +89,25 @@ ls -A
 cp -rf $baseDir* $destDir
 
 s_debug "before config"
-s_debug $targetDir: `ls -A $targetDir`
-s_debug $destDir: `ls -A $destDir`
 
 git config user.email "pleasemailus@wercker.com"
 git config user.name "werckerbot"
 
 # generate cname file
 createCNAME $targetDir
+s_debug "base:" $baseDir: `ls -A $baseDir`
+s_debug "target:" $targetDir: `ls -A $targetDir`
+s_debug "dest:" $destDir: `ls -A $destDir`
 
-s_debug "before tag"
+tag=$WERCKER_GIT_PUSH_TAG
+s_debug "before tagExtraction: $tag"
 
-tag=$(getTag $baseDir)
+tag=$(getTag $tag $targetDir/)
+s_debug "Tag after targetDir $tag"
+tag=$(getTag $tag $destDir/)
+s_debug "Tag after destDir $tag"
+tag=$(getTag $tag $baseDir/)
+s_debug "Tag after baseDir $tag"
 
 if [ -n "$tag" ]; then
   s_info "The commit will be tagged with $tag"
