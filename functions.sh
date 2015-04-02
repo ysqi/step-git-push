@@ -17,7 +17,9 @@ function s_success {
 }
 
 function s_debug {
-  debug "$(sanitizeOutput $@)"
+  if [ "$WERCKER_GIT_PUSH_DEBUG" == "true" ]; then
+    info "DEBUG: $(sanitizeOutput $@)"
+  fi
 }
 
 function s_warning {

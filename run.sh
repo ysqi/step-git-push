@@ -34,10 +34,6 @@ baseDir=$(getBaseDir)
 # setup branch
 remoteBranch=$(getBranch)
 
-if [ -z "$WERCKER_GIT_PUSH_DESTDIR" ]; then
-  WERCKER_GIT_PUSH_DESTDIR=/
-fi
-
 cd $baseDir
 rm -rf .git
 
@@ -46,6 +42,14 @@ localBranch="master"
 # remove existing files
 targetDir="/tmp/git-push"
 rm -rf $targetDir
+
+destDir=$targetDir
+
+if [ -n "$WERCKER_GIT_PUSH_DESTDIR" ]; then
+  destDir=$targetDir/$WERCKER_GIT_PUSH_DESTDIR
+fi
+
+s_debug "before init"
 
 # init repository
 if [ -n "$WERCKER_GIT_PUSH_DISCARD_HISTORY" ]; then
@@ -64,17 +68,27 @@ fi
 info "Initialized Repo in $targetDir"
 
 cd $targetDir
-mkdir -p ./$WERCKER_GIT_PUSH_DESTDIR
+mkdir -p $destDir
 
-cd ./$WERCKER_GIT_PUSH_DESTDIR
+cd $destDir
+
+echo $destDir $targetDir
+
+s_debug "before clean"
 
 if [ -n "$WERCKER_GIT_PUSH_CLEAN_REMOVED_FILES" ]; then
+  info "We will clean in $destDir"
   ls -A | grep -v .git | xargs rm -rf
+  mkdir -p $destDir
 fi
 
 cd $targetDir
 
-cp -rf $baseDir* ./$WERCKER_GIT_PUSH_DESTDIR
+ls -A
+
+cp -rf $baseDir* $destDir
+
+s_debug "before config"
 
 git config user.email "pleasemailus@wercker.com"
 git config user.name "werckerbot"
@@ -82,6 +96,7 @@ git config user.name "werckerbot"
 # generate cname file
 createCNAME $targetDir
 
+s_debug "before tag"
 
 tag=$(getTag $baseDir)
 
@@ -117,6 +132,9 @@ if [ -n "$WERCKER_GIT_PUSH_TAG" ]; then
       pushTag $remoteURL $tag
   fi
 fi
+
+
+s_debug "before unset"
 
 for variable in $(getAllStepVars)
 do
