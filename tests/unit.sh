@@ -148,14 +148,11 @@ failed=false
 
 ## Test if we get the right tags
 
-WERCKER_GIT_PUSH_TAG="foo"
-[ $(getTag) != "foo" ] && error "$(getTag) != foo"
+[ $(getTag "foo") != "foo" ] && error "$(getTag) != foo"
 
-WERCKER_GIT_PUSH_TAG="bower"
-[ $(getTag $currDir/fixtures/) != "0.1.1" ] && error "$(getTag $currDir/fixtures/) != 0.1.1"
+[ $(getTag "bower" $currDir/fixtures/) != "0.1.1" ] && error "$(getTag "bower" $currDir/fixtures/) != 0.1.1"
 
-WERCKER_GIT_PUSH_TAG="node"
-getTag $currDir/fixtures/
+getTag "node" $currDir/fixtures/
 [ $failed != "true" ] && error "Malformatted package.json should fail"
 failed=false
 
