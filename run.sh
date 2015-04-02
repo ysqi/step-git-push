@@ -89,6 +89,8 @@ ls -A
 cp -rf $baseDir* $destDir
 
 s_debug "before config"
+s_debug $targetDir: `ls -A $targetDir`
+s_debug $destDir: `ls -A $destDir`
 
 git config user.email "pleasemailus@wercker.com"
 git config user.name "werckerbot"

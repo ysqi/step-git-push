@@ -17,7 +17,7 @@ function fail {
     echo FATAL: $@
     exit -1
 }
-GH_TOKEN=b3c3df7f8365fd7fee72c2e1b640c762dd754198
+
 function init {
   cd $currDir
   WERCKER_GIT_PUSH_REPO="leipert/xkcd-now-clock"
