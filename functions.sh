@@ -124,14 +124,36 @@ function checkoutBranch {
   fi
 }
 
+function getTagWithPython {
+  result=$(cat $1 | python -c 'import sys, json; print json.load(sys.stdin)["version"]' 2>&1);
+  if [[ $? -ne 0 ]]; then
+    s_warning "$result"
+    s_fail "Could not load version from $1"
+  else
+    echo "$result"
+  fi
+}
+
+function getTagWithNode {
+  result=$(node -p "require(\"$1\").version" 2>&1)
+  if [[ $? -ne 0 ]]; then
+    s_warning "$result"
+    s_fail "Could not load version from $1"
+  else
+    echo "$result"
+  fi
+}
+
 function getTagFromJSON {
   if [ -f $1$2 ]; then
-    result=$(cat $1$2 | python -c 'import sys, json; print json.load(sys.stdin)["version"]' 2>&1);
-    if [[ $? -ne 0 ]]; then
-      s_warning "$result"
-      s_fail "Could not load version from $1$2"
+    if [ -n "`which node`" ]; then
+      getTagWithNode $1$2
     else
-      echo "$result"
+      if [ -n "`which python`" ]; then
+        getTagWithPython $1$2
+      else
+        echo "$3"
+      fi
     fi
   else
     echo "$3"
