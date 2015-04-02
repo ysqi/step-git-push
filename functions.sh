@@ -21,7 +21,7 @@ function s_debug {
 }
 
 function s_warning {
-  warning "$(sanitizeOutput $@)"
+  info "WARNING: $(sanitizeOutput $@)"
 }
 
 function s_fail {
