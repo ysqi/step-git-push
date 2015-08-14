@@ -2,6 +2,8 @@
 set -e
 set +o pipefail
 
+. functions.sh
+
 for variable in $(getAllStepVars)
 do
   if [ "${!variable}" == "false" ]; then
