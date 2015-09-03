@@ -94,15 +94,17 @@ function getBaseDir {
 
 function initEmptyRepoAt {
 
+  s_debug "Initializing empty repo at: " $1
   cd
   rm -rf $1
-  mkdir -p $1
+  git init -q $1
   cd $1
-  git init -q
+  s_debug "Done initializing empty repo at: " $1
 
 }
 
 function cloneRepo {
+  s_debug "Cloning repo from: " $1 " to: " $2
   result=$(git clone $1 $2 -q 2>&1)
   if [[ $? -ne 0 ]]; then
     s_warning "$result"
