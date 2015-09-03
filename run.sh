@@ -96,11 +96,12 @@ function getBaseDir {
 
 function initEmptyRepoAt {
 
+  s_debug "Initializing empty repo at: " $1
   cd
   rm -rf $1
-  mkdir -p $1
+  git init -q $1
   cd $1
-  git init -q
+  s_debug "Done initializing empty repo at: " $1
 
 }
 
