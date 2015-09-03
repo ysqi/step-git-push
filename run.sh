@@ -2,6 +2,10 @@
 set -e
 set +o pipefail
 
+# LOAD OUR FUNCTIONS
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+. ${DIR}/functions.sh
+
 for variable in $(getAllStepVars)
 do
   if [ "${!variable}" == "false" ]; then
@@ -14,10 +18,6 @@ if [ -n "$WERCKER_GIT_PUSH_GH_TOKEN" ]; then
   setMessage "Your gh_token may be compromised. Please check https://github.com/leipert/step-git-push for more info"
   fail "Your gh_token may be compromised. Please check https://github.com/leipert/step-git-push for more info"
 fi
-
-# LOAD OUR FUNCTIONS
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-. ${DIR}/functions.sh
 
 repo=$(getRepoPath)
 
