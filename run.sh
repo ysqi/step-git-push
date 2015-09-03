@@ -106,6 +106,7 @@ function initEmptyRepoAt {
 }
 
 function cloneRepo {
+  s_debug "Cloning repo from: " $1 " to: " $2
   result=$(git clone $1 $2 -q 2>&1)
   if [[ $? -ne 0 ]]; then
     s_warning "$result"
@@ -265,9 +266,9 @@ if [ -n "$WERCKER_GIT_PUSH_DISCARD_HISTORY" ]; then
 else
   cloneRepo $remoteURL $targetDir
   if checkBranchExistence $targetDir $remoteBranch; then
+    s_info "branch $remoteBranch exists on remote $remoteURL"
     checkoutBranch $targetDir $remoteBranch
     localBranch=$remoteBranch
-    s_info "branch $remoteBranch exists on remote $remoteURL"
   else
     initEmptyRepoAt $targetDir
   fi
