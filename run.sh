@@ -6,6 +6,13 @@ set +o pipefail
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 . ${DIR}/functions.sh
 
+# Trace (after loading)
+if [ "$WERCKER_GIT_PUSH_TRACE" == "true" ]; then
+  s_info "Tracing enabled"
+  set -x
+fi
+
+# Start work
 for variable in $(getAllStepVars)
 do
   if [ "${!variable}" == "false" ]; then
