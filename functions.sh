@@ -43,6 +43,17 @@ function getRepoPath {
   fi
 }
 
+
+function isGitSuffix {
+  if [ "false" = "$WERCKER_GIT_PUSH_GITSUFFIX"];then
+      #false
+      echo 1
+  else 
+      #true
+      echo 1
+  fi
+}
+
 #RETURNS FULL REMOTE PATH OF THE REPO
 function getRemoteURL {
   repo=$(getRepoPath)
@@ -50,7 +61,11 @@ function getRemoteURL {
     echo "https://$WERCKER_GIT_PUSH_GH_OAUTH@github.com/$repo.git"
   elif [ -n "$WERCKER_GIT_PUSH_HOST" ]; then
     git_user=$(getGitSSHUser)
-    echo "$git_user@$WERCKER_GIT_PUSH_HOST:$repo.git"
+    if [ $(isGitSuffix) ]; then
+      echo "$git_user@$WERCKER_GIT_PUSH_HOST:$repo.git"
+    else
+      echo "$git_user@$WERCKER_GIT_PUSH_HOST:$repo"
+    fi
   else
     echo ""
   fi
