@@ -1,1 +1,6 @@
-box: wercker/default
+box: nodesource/trusty
+build:
+    steps:
+      - install-packages:
+        packages: node
+      - validate-wercker-step
