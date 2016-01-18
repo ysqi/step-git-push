@@ -3,4 +3,5 @@ build:
     steps:
       - install-packages:
         packages: node
+      - npm-install
       - validate-wercker-step
