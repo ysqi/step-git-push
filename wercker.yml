@@ -1,7 +1,5 @@
-box: nodesource/trusty
+box: node
 build:
     steps:
-      - install-packages:
-        packages: node
       - npm-install
       - validate-wercker-step
