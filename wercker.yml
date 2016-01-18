@@ -2,4 +2,3 @@ box: node
 build:
     steps:
       - npm-install
-      - validate-wercker-step
