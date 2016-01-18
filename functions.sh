@@ -50,7 +50,7 @@ function isGitSuffix {
       echo 1
   else 
       #true
-      echo 1
+      echo 0
   fi
 }
 
