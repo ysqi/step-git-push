@@ -43,9 +43,9 @@ function getRepoPath {
   fi
 }
 
-
+# RETURNS RemoteURL is end with '.git' in GIT_PUSH or current WERCKER
 function isGitSuffix {
-  if [ "false" = "$WERCKER_GIT_PUSH_GITSUFFIX"];then
+  if [ "false" == "$WERCKER_GIT_PUSH_GITSUFFIX" ];then
       #false
       echo 1
   else 
