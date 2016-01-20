@@ -1,4 +1,1 @@
-box: node
-build:
-    steps:
-      - npm-install
+box: wercker/default
