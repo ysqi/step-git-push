@@ -33,7 +33,7 @@ You either have to define a `gh_oauth` token if you deploy to github or a `host`
 - `gh_pages_domain` *optional* Custom domain ([documentation](https://help.github.com/articles/setting-up-a-custom-domain-with-pages))
 - `tag` *optional* Adds a tag to the pushed commit. Valid options are bower, node or any string.
 - `tag_overwrite` *optional* If set, tags will be overwritten
-- `gitsuffix` *optional* If set false,git remoteurl will don't add *.git* suffix.
+- `notgitsuffix` *optional* If set true,git remoteurl will don't add *.git* suffix.
 
 ## Example
 
@@ -63,5 +63,5 @@ deploy:
          repo: example/exampleRepo
          branch: example
          basedir: build
-         gitsuffix: true
+         notgitsuffix: false
 ```
